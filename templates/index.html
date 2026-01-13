@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Face Recognition Attendance System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d0221;
+            min-height: 100vh;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(138, 43, 226, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(0, 191, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(135, 206, 250, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 30% 70%, rgba(50, 205, 50, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+            animation: gradientMove 20s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .navbar {
+            background: rgba(13, 2, 33, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid transparent;
+            border-image: linear-gradient(90deg, #ff0080, #ff8c00, #ffd700, #00ff00, #00bfff, #4169e1, #8a2be2) 1;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff0080 0%, #ff8c00 16%, #ffd700 33%, #00ff00 50%, #00bfff 66%, #4169e1 83%, #8a2be2 100%);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: rainbowFlow 8s ease infinite;
+        }
+
+        @keyframes rainbowFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .navbar-brand .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff0080 0%, #8a2be2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
+            animation: iconPulse 3s ease infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(138, 43, 226, 0.8); }
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .hero-section h1 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            text-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
+        }
+
+        .hero-section .gradient-text {
+            background: linear-gradient(135deg, #ff0080 0%, #ff8c00 16%, #ffd700 33%, #00ff00 50%, #00bfff 66%, #4169e1 83%, #8a2be2 100%);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbowFlow 8s ease infinite;
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-section .gradient-text::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0080, #ff8c00, #ffd700, #00ff00, #00bfff, #4169e1, #8a2be2);
+            border-radius: 2px;
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .hero-section p {
+            color: #b8b8d1;
+            font-size: 1.3rem;
+            font-weight: 400;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .alert {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.15) 0%, rgba(138, 43, 226, 0.15) 100%);
+            border: 2px solid rgba(255, 0, 128, 0.4);
+            border-radius: 18px;
+            backdrop-filter: blur(15px);
+            color: #e8e8f5;
+            padding: 20px 28px;
+            margin-bottom: 40px;
+            animation: slideInDown 0.5s ease-out;
+            box-shadow: 0 8px 32px rgba(255, 0, 128, 0.2);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin-bottom: 80px;
+        }
+
+        .feature-card {
+            background: rgba(30, 15, 60, 0.4);
+            backdrop-filter: blur(25px);
+            border: 2px solid transparent;
+            border-radius: 28px;
+            padding: 45px 35px;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 28px;
+            padding: 2px;
+            background: var(--card-gradient);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.6;
+            transition: opacity 0.5s ease;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent 0%, var(--glow-color) 25%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        .feature-card:nth-child(1) {
+            --card-gradient: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            --glow-color: rgba(59, 130, 246, 0.3);
+            --hover-gradient: linear-gradient(135deg, #2563eb, #60a5fa);
+            animation-delay: 0.1s;
+        }
+
+        .feature-card:nth-child(2) {
+            --card-gradient: linear-gradient(135deg, #0f766e, #14b8a6);
+            --glow-color: rgba(20, 184, 166, 0.3);
+            --hover-gradient: linear-gradient(135deg, #0d9488, #2dd4bf);
+            animation-delay: 0.2s;
+        }
+
+        .feature-card:nth-child(3) {
+            --card-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --glow-color: rgba(139, 92, 246, 0.3);
+            --hover-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
+            animation-delay: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 70px var(--glow-color);
+            background: rgba(30, 15, 60, 0.7);
+        }
+
+        .feature-card:hover .card-icon {
+            background: var(--hover-gradient);
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 18px 50px var(--glow-color);
+        }
+
+        .feature-card:hover .btn-primary-custom {
+            background: var(--hover-gradient);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover::after {
+            opacity: 0.15;
+        }
+
+        .card-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 28px;
+            border-radius: 22px;
+            background: var(--card-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 12px 35px var(--glow-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 22px;
+            background: var(--card-gradient);
+            filter: blur(15px);
+            opacity: 0.5;
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+
+        .feature-card:hover .card-icon::before {
+            background: var(--hover-gradient);
+            opacity: 0.7;
+        }
+
+        .feature-card h4 {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 18px;
+            letter-spacing: -0.3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card p {
+            color: #b8b8d1;
+            margin-bottom: 30px;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary-custom {
+            padding: 15px 38px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            color: white;
+            display: inline-block;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--card-gradient);
+            box-shadow: 0 6px 20px var(--glow-color);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-primary-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary-custom:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px var(--glow-color);
+            color: white;
+        }
+
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+
+        .attendance-panel {
+            background: rgba(30, 15, 60, 0.4);
+            backdrop-filter: blur(25px);
+            border: 2px solid transparent;
+            border-radius: 28px;
+            padding: 50px;
+            animation: fadeInUp 0.7s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .attendance-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 28px;
+            padding: 2px;
+            background: linear-gradient(135deg, #ff0080, #ff8c00, #ffd700, #00ff00, #00bfff, #4169e1, #8a2be2);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.6;
+        }
+
+        .attendance-panel h3 {
+            background: linear-gradient(135deg, #ff0080 0%, #ff8c00 16%, #ffd700 33%, #00ff00 50%, #00bfff 66%, #4169e1 83%, #8a2be2 100%);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 45px;
+            text-align: center;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            animation: rainbowFlow 8s ease infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .date-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 45px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .date-input {
+            padding: 16px 28px;
+            border: 2px solid rgba(255, 0, 128, 0.4);
+            border-radius: 14px;
+            font-size: 1.05rem;
+            transition: all 0.4s ease;
+            outline: none;
+            background: rgba(13, 2, 33, 0.6);
+            color: white;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            min-width: 220px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .date-input:focus {
+            border-color: #ff0080;
+            box-shadow: 0 0 0 4px rgba(255, 0, 128, 0.25), 0 8px 25px rgba(255, 0, 128, 0.4);
+            background: rgba(13, 2, 33, 0.8);
+        }
+
+        /* CHANGED: View Records Button - DARK PINK */
+        .btn-show {
+            background: linear-gradient(135deg, #ff0080 0%, #c90066 100%); /* Deep Dark Pink */
+            padding: 16px 40px;
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 20px rgba(255, 0, 128, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Shining Sweep Effect */
+        .btn-show::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-show:hover::before {
+            left: 100%;
+        }
+
+        /* Hover Lift and Glow */
+        .btn-show:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 0, 128, 0.6);
+            color: white;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 18px;
+            background: rgba(13, 2, 33, 0.6);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 0, 128, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .custom-table {
+            margin: 0;
+            width: 100%;
+        }
+
+        .custom-table thead {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.3) 0%, rgba(138, 43, 226, 0.3) 100%);
+        }
+
+        .custom-table thead th {
+            color: white;
+            font-weight: 800;
+            padding: 22px 26px;
+            border: none;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .custom-table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 0, 128, 0.15);
+        }
+
+        .custom-table tbody tr:hover {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.15) 0%, rgba(0, 191, 255, 0.15) 100%);
+        }
+
+        .custom-table tbody td {
+            padding: 20px 26px;
+            vertical-align: middle;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #000000;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(230, 230, 230, 0.9) 100%);
+            border-radius: 8px;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .attendance-panel {
+                padding: 35px 25px;
+            }
+
+            .date-form {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .date-input, .btn-show {
+                width: 100%;
+            }
+
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+        }
+
+        .stats-badge {
+            display: block;
+            padding: 8px 16px;
+            background: rgba(255, 0, 128, 0.2);
+            border: 1px solid rgba(255, 0, 128, 0.4);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #ffb3d9;
+            font-weight: 700;
+            margin-top: 14px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <div class="icon">🎭</div>
+                <span>FaceTrack AI</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="hero-section">
+            <h1>
+                Smart <span class="gradient-text">Face Recognition</span><br>
+                Attendance System
+            </h1>
+            <p>AI-powered attendance tracking with real-time face detection and secure data management</p>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="alert text-center">
+                <strong>ℹ️ {{ msg }}</strong>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="cards-grid">
+            <div class="feature-card">
+                <div class="card-icon">
+                    <span>👤</span>
+                </div>
+                <h4>Register New Face</h4>
+                <p>Capture and register new faces with our advanced facial recognition system</p>
+                <a href="/register_face" class="btn-primary-custom">Open Camera</a>
+                <div class="stats-badge">📊 High Accuracy</div>
+            </div>
+
+            <div class="feature-card">
+                <div class="card-icon">
+                    <span>🧬</span>
+                </div>
+                <h4>Extract Features</h4>
+                <p>Process and extract unique facial features using deep learning algorithms</p>
+                <a href="/extract_features" class="btn-primary-custom">Generate Features</a>
+                <div class="stats-badge">⚡ Fast Processing</div>
+            </div>
+
+            <div class="feature-card">
+                <div class="card-icon">
+                    <span>📸</span>
+                </div>
+                <h4>Start Attendance</h4>
+                <p>Begin real-time face recognition for automated attendance marking</p>
+                <a href="/start_attendance" class="btn-primary-custom">Start Camera</a>
+                <div class="stats-badge">🔒 Secure & Private</div>
+            </div>
+        </div>
+
+        <div class="attendance-panel">
+            <h3>
+                <span>📊</span>
+                Attendance Records
+            </h3>
+
+            <form method="POST" action="/attendance" class="date-form">
+                <input type="date" name="selected_date" required value="{{ selected_date }}" class="date-input">
+                <button type="submit" class="btn-show">View Records</button>
+            </form>
+
+            {% if no_data %}
+            <div class="alert text-center" style="background: rgba(255, 100, 100, 0.2); border-color: rgba(255, 100, 100, 0.4);">
+                <strong>⚠️ No attendance records found for the selected date</strong>
+            </div>
+            {% endif %}
+
+            {% if attendance_data %}
+            <div class="table-container">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>👤 Name</th>
+                            <th>🕐 Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for name, time in attendance_data %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td>{{ time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>
